@@ -22,6 +22,8 @@ func setupRouter() *gin.Engine {
 
 	// Ip resolve
 	r.GET("/ips", func(c *gin.Context) {
+		//todo param validation
+
 		//todo fetch from db & local cache(ttl)
 		ips, ok := ipLists[c.Query("region") + ":" + c.Query("service-name")]
 		if ok {
@@ -33,6 +35,8 @@ func setupRouter() *gin.Engine {
 
 	// Ip register
 	r.POST("/ip", func(c *gin.Context) {
+		//todo param validation
+
 		serviceID := c.PostForm("region") + ":" + c.PostForm("service-name")
 		ips, ok := ipLists[serviceID]
 		if ok {
