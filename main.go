@@ -61,6 +61,8 @@ func run(r *gin.Engine) {
 	log.Println("Listening:" + port)
 
 	http.Serve(ln, r)
+
+	//todo glance shutdown
 }
 
 func main() {
