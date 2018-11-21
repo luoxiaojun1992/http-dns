@@ -12,7 +12,7 @@ import (
 	"github.com/luoxiaojun1992/http-dns/models"
 )
 
-var engine *xorm.Engine
+var orm *xorm.Engine
 
 var ipLists map[string][]map[string]string
 
@@ -36,9 +36,13 @@ func setupRouter() *gin.Engine {
 		err := c.BindQuery(&QueryObj)
 
 		if err == nil {
-			//todo fetch from db & local cache(ttl)
-			ips, ok := ipLists[QueryObj.Region+":"+QueryObj.ServiceName]
-			if ok {
+			//todo local cache(ttl)
+			ips := make([]models.IpList, 0, 10)
+			err := orm.Where("region = ? AND service_name = ?", QueryObj.Region, QueryObj.ServiceName).
+				Limit(10).
+				Select("ip, ttl").
+				Find(&ips)
+			if err == nil {
 				c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "ok", "data": gin.H{"ips": ips}})
 			} else {
 				c.JSON(http.StatusNotFound, gin.H{"code": 1, "msg": "service not found"})
@@ -86,13 +90,14 @@ func run(r *gin.Engine) {
 
 func init() {
 	var err error
-	engine, err = xorm.NewEngine("mysql", "root:0600120597$Abc@/http_dns?charset=utf8mb4")
+	//todo env or config
+	orm, err = xorm.NewEngine("mysql", "root:0600120597$Abc@/http_dns?charset=utf8mb4")
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	//Sync Tables
-	err = engine.Sync2(new(models.IpList))
+	err = orm.Sync2(new(models.IpList))
 	if err != nil {
 		log.Fatal(err)
 	}
