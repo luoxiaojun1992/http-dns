@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"net"
 	"log"
+	"net"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/go-xorm/xorm"
@@ -28,8 +28,8 @@ func setupRouter() *gin.Engine {
 
 	// Ip resolve
 	r.GET("/ips", func(c *gin.Context) {
-		var QueryObj struct{
-			Region string `form:"region" binding:"required"`
+		var QueryObj struct {
+			Region      string `form:"region" binding:"required"`
 			ServiceName string `form:"service-name" binding:"required"`
 		}
 
@@ -45,26 +45,40 @@ func setupRouter() *gin.Engine {
 			if err == nil {
 				c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "ok", "data": gin.H{"ips": ips}})
 			} else {
-				c.JSON(http.StatusNotFound, gin.H{"code": 1, "msg": "service not found"})
+				c.JSON(http.StatusNotFound, gin.H{"code": 1, "msg": err.Error()})
 			}
 		} else {
-			c.JSON(http.StatusBadRequest, gin.H{"code":1, "msg": err.Error()})
+			c.JSON(http.StatusBadRequest, gin.H{"code": 1, "msg": err.Error()})
 		}
 	})
 
 	// Ip register
 	r.POST("/ip", func(c *gin.Context) {
-		//todo param validation
-
-		serviceID := c.PostForm("region") + ":" + c.PostForm("service-name")
-		ips, ok := ipLists[serviceID]
-		if ok {
-			ipLists[serviceID] = append(ips, map[string]string{"ip": c.PostForm("ip"), "ttl": c.PostForm("ttl")})
-		} else {
-			ipLists[serviceID] = []map[string]string{{"ip": c.PostForm("ip"), "ttl": "600"}}
+		var PostForm struct {
+			Region      string `form:"region" binding:"required"`
+			ServiceName string `form:"service-name" binding:"required"`
+			Ip          string `form:"ip" binding:"required"`
+			Ttl         string `form:"ttl" binding:"required"`
 		}
 
-		c.JSON(http.StatusOK, gin.H{"code":0, "msg":"ok", "data":gin.H{"ips":ipLists[serviceID]}})
+		err := c.Bind(&PostForm)
+
+		if err == nil {
+			_, err := orm.Insert(models.IpList{
+				Region:      PostForm.Region,
+				ServiceName: PostForm.ServiceName,
+				Ip:          PostForm.Ip,
+				Ttl:         PostForm.Ttl,
+			})
+
+			if err == nil {
+				c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "ok"})
+			} else {
+				c.JSON(http.StatusOK, gin.H{"code": 1, "msg": err.Error()})
+			}
+		} else {
+			c.JSON(http.StatusOK, gin.H{"code": 1, "msg": err.Error()})
+		}
 	})
 
 	return r
