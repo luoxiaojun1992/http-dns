@@ -86,13 +86,16 @@ func run(r *gin.Engine) {
 
 func init() {
 	var err error
-	engine, err = xorm.NewEngine("mysql", "root:0600120597Abc@/http_dns?charset=utf8")
+	engine, err = xorm.NewEngine("mysql", "root:0600120597$Abc@/http_dns?charset=utf8mb4")
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	//Sync Tables
-	engine.Sync2(new(models.IpList))
+	err = engine.Sync2(new(models.IpList))
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func main() {

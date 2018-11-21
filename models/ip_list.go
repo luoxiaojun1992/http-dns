@@ -8,6 +8,6 @@ type IpList struct {
 	ServiceName string `xorm:"varchar(255) notnull default '' 'service name'"`
 	Ip string `xorm:"varchar(20) notnull default '' 'ip'"`
 	Ttl string `xorm:"varchar(255) not null default '0' 'ttl'"`
-	CreatedAt time.Time `xorm:"TIMESTAMP notnull created 'created at'"`
-	UpdatedAt time.Time `xorm:"TIMESTAMP notnull updated 'updated at'"`
+	CreatedAt time.Time `xorm:"TIMESTAMP notnull created default CURRENT_TIMESTAMP 'created at'"`
+	UpdatedAt time.Time `xorm:"TIMESTAMP notnull updated default CURRENT_TIMESTAMP 'updated at'"`
 }
