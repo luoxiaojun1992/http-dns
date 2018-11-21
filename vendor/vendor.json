@@ -41,6 +41,30 @@
 			"versionExact": "v1.3.0"
 		},
 		{
+			"checksumSHA1": "BIExo6OWlfgdjN7Qh0tmxyfjNTM=",
+			"path": "github.com/go-sql-driver/mysql",
+			"revision": "6be42e0ff99645d7d9626d779001a46e39c5f280",
+			"revisionTime": "2018-11-16T10:20:33Z"
+		},
+		{
+			"checksumSHA1": "6atR+t4aMVKculfOXtFQNq3l8BQ=",
+			"path": "github.com/go-xorm/builder",
+			"revision": "03eb88feccce3e477c318ce7f6f1b386544ab20b",
+			"revisionTime": "2018-10-26T05:37:58Z"
+		},
+		{
+			"checksumSHA1": "COnttajcyxQ700jx0i2FmcE1lD4=",
+			"path": "github.com/go-xorm/core",
+			"revision": "6bc9412b1c4d00c0a5cc9dd939a245a82cc50227",
+			"revisionTime": "2018-10-08T13:23:26Z"
+		},
+		{
+			"checksumSHA1": "KcoVMxN+l1ABVEEdHjmXxxz65tY=",
+			"path": "github.com/go-xorm/xorm",
+			"revision": "b07c4067034594d1a43e314b10153ff9cfc58f86",
+			"revisionTime": "2018-11-02T16:17:11Z"
+		},
+		{
 			"checksumSHA1": "MVW67aGwWsD1pGmL04HlQlaOfKE=",
 			"path": "github.com/golang/protobuf/proto",
 			"revision": "52132540909e117f2b98b0694383dc0ab1e1deca",
@@ -78,6 +102,10 @@
 		},
 		{
 			"path": "golang.org/x/sys/unix",
+			"revision": ""
+		},
+		{
+			"path": "google.golang.org/appengine/cloudsql",
 			"revision": ""
 		},
 		{

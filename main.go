@@ -6,7 +6,13 @@ import (
 	"github.com/gin-gonic/gin"
 	"net"
 	"log"
+
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/go-xorm/xorm"
+	"github.com/luoxiaojun1992/http-dns/models"
 )
+
+var engine *xorm.Engine
 
 var ipLists map[string][]map[string]string
 
@@ -22,14 +28,23 @@ func setupRouter() *gin.Engine {
 
 	// Ip resolve
 	r.GET("/ips", func(c *gin.Context) {
-		//todo param validation
+		var QueryObj struct{
+			Region string `form:"region" binding:"required"`
+			ServiceName string `form:"service-name" binding:"required"`
+		}
 
-		//todo fetch from db & local cache(ttl)
-		ips, ok := ipLists[c.Query("region") + ":" + c.Query("service-name")]
-		if ok {
-			c.JSON(http.StatusOK, gin.H{"code":0, "msg":"ok", "data":gin.H{"ips":ips}})
+		err := c.BindQuery(&QueryObj)
+
+		if err == nil {
+			//todo fetch from db & local cache(ttl)
+			ips, ok := ipLists[QueryObj.Region+":"+QueryObj.ServiceName]
+			if ok {
+				c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "ok", "data": gin.H{"ips": ips}})
+			} else {
+				c.JSON(http.StatusNotFound, gin.H{"code": 1, "msg": "service not found"})
+			}
 		} else {
-			c.JSON(http.StatusNotFound, gin.H{"code":1, "msg":"service not found"})
+			c.JSON(http.StatusBadRequest, gin.H{"code":1, "msg": err.Error()})
 		}
 	})
 
@@ -67,6 +82,17 @@ func run(r *gin.Engine) {
 	http.Serve(ln, r)
 
 	//todo glance shutdown
+}
+
+func init() {
+	var err error
+	engine, err = xorm.NewEngine("mysql", "root:0600120597Abc@/http_dns?charset=utf8")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	//Sync Tables
+	engine.Sync2(new(models.IpList))
 }
 
 func main() {
