@@ -1,22 +1,20 @@
 package main
 
 import (
-	"net/http"
-
 	"github.com/gin-gonic/gin"
-	"log"
-	"net"
-
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/go-xorm/xorm"
+	"github.com/joho/godotenv"
 	"github.com/luoxiaojun1992/http-dns/models"
 	"github.com/patrickmn/go-cache"
-	"time"
-	"github.com/joho/godotenv"
+	"log"
+	"net"
+	"net/http"
 	"os"
-	"sync"
 	"os/signal"
+	"sync"
 	"syscall"
+	"time"
 )
 
 var orm *xorm.Engine
@@ -197,7 +195,7 @@ func init() {
 	}
 
 	//Init ORM
-	orm, err = xorm.NewEngine("mysql", os.Getenv("DB_USER") + ":" + os.Getenv("DB_PWD") + "@/" + os.Getenv("DB_NAME") + "?charset=utf8mb4")
+	orm, err = xorm.NewEngine("mysql", os.Getenv("DB_USER")+":"+os.Getenv("DB_PWD")+"@/"+os.Getenv("DB_NAME")+"?charset=utf8mb4")
 	if err != nil {
 		log.Fatal(err)
 	}
