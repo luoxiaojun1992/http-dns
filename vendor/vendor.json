@@ -95,6 +95,12 @@
 			"revisionTime": "2018-07-18T01:23:57Z"
 		},
 		{
+			"checksumSHA1": "W8mzTLRjnooGtHwWaxSX8eq8hlY=",
+			"path": "github.com/patrickmn/go-cache",
+			"revision": "5633e0862627c011927fa39556acae8b1f1df58a",
+			"revisionTime": "2018-08-15T05:31:27Z"
+		},
+		{
 			"checksumSHA1": "Iji5TC/S+qBOPLESJSrSpthHcVU=",
 			"path": "github.com/ugorji/go/codec",
 			"revision": "ce1d12656603bc8fa8009023db97a0f0176ca4b9",
