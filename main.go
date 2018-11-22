@@ -15,6 +15,7 @@ import (
 	"time"
 	"github.com/luoxiaojun1992/http-dns/services"
 	"github.com/luoxiaojun1992/http-dns/utils"
+	"github.com/luoxiaojun1992/DI"
 )
 
 var localCache *cache.Cache
@@ -44,7 +45,7 @@ func setupRouter() *gin.Engine {
 				return
 			}
 
-			ips, err := services.IpService.GetList(QueryObj.Region, QueryObj.ServiceName)
+			ips, err := DI.C.Resolve("ip-service").(*services.IpServiceProto).GetList(QueryObj.Region, QueryObj.ServiceName)
 
 			if err == nil {
 				localCache.Set("ip:"+QueryObj.Region+":"+QueryObj.ServiceName, ips, -1)
@@ -69,10 +70,11 @@ func setupRouter() *gin.Engine {
 		err := c.Bind(&PostForm)
 
 		if err == nil {
-			_, err := services.IpService.Add(PostForm.Region, PostForm.ServiceName, PostForm.Ip, PostForm.Ttl)
+			ipService := DI.C.Resolve("ip-service").(*services.IpServiceProto)
+			_, err := ipService.Add(PostForm.Region, PostForm.ServiceName, PostForm.Ip, PostForm.Ttl)
 			if err == nil {
 				//Update local cache
-				ips, err := services.IpService.GetList(PostForm.Region, PostForm.ServiceName)
+				ips, err := ipService.GetList(PostForm.Region, PostForm.ServiceName)
 				if err == nil {
 					localCache.Set("ip:"+PostForm.Region+":"+PostForm.ServiceName, ips, -1)
 				}
@@ -96,10 +98,11 @@ func setupRouter() *gin.Engine {
 		err := c.Bind(&QueryObject)
 
 		if err == nil {
-			_, err := services.IpService.Delete(QueryObject.Region, QueryObject.ServiceName)
+			ipService := DI.C.Resolve("ip-service").(*services.IpServiceProto)
+			_, err := ipService.Delete(QueryObject.Region, QueryObject.ServiceName)
 			if err == nil {
 				//Update local cache
-				ips, err := services.IpService.GetList(QueryObject.Region, QueryObject.ServiceName)
+				ips, err := ipService.GetList(QueryObject.Region, QueryObject.ServiceName)
 				if err == nil {
 					localCache.Set("ip:"+QueryObject.Region+":"+QueryObject.ServiceName, ips, -1)
 				}

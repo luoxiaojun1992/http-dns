@@ -83,6 +83,12 @@
 			"revisionTime": "2018-11-12T06:45:56Z"
 		},
 		{
+			"checksumSHA1": "upvLV8h1p3xzouLuyp+DV+QjifU=",
+			"path": "github.com/luoxiaojun1992/DI",
+			"revision": "aff99096c0a805c3d033abc4b7b603010d7592f4",
+			"revisionTime": "2018-11-11T11:47:57Z"
+		},
+		{
 			"checksumSHA1": "GiVgQkx5acnq+JZtYiuHPlhHoso=",
 			"path": "github.com/mattn/go-isatty",
 			"revision": "3fb116b820352b7f0c281308a4d6250c22d94e27",
