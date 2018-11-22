@@ -15,6 +15,7 @@ import (
 	"sync"
 	"syscall"
 	"time"
+	"github.com/luoxiaojun1992/http-dns/services"
 )
 
 var orm *xorm.Engine
@@ -40,18 +41,13 @@ func setupRouter() *gin.Engine {
 		err := c.BindQuery(&QueryObj)
 
 		if err == nil {
-			ips := make([]models.IpList, 0, 10)
-
 			if ipListCache, result := localCache.Get("ip:" + QueryObj.Region + ":" + QueryObj.ServiceName); result {
 				c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "ok", "data": gin.H{"ips": ipListCache}})
 				return
 			}
 
-			err := orm.Where("region = ? AND service_name = ?", QueryObj.Region, QueryObj.ServiceName).
-				Limit(10).
-				OrderBy("updated_at DESC").
-				Select("ip, ttl").
-				Find(&ips)
+			ips, err := services.IpService.GetList(QueryObj.Region, QueryObj.ServiceName, orm)
+
 			if err == nil {
 				localCache.Set("ip:"+QueryObj.Region+":"+QueryObj.ServiceName, ips, -1)
 				c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "ok", "data": gin.H{"ips": ips}})
@@ -84,13 +80,7 @@ func setupRouter() *gin.Engine {
 
 			if err == nil {
 				//Update local cache
-				ips := make([]models.IpList, 0, 10)
-
-				err := orm.Where("region = ? AND service_name = ?", PostForm.Region, PostForm.ServiceName).
-					Limit(10).
-					OrderBy("updated_at DESC").
-					Select("ip, ttl").
-					Find(&ips)
+				ips, err := services.IpService.GetList(PostForm.Region, PostForm.ServiceName, orm)
 				if err == nil {
 					localCache.Set("ip:"+PostForm.Region+":"+PostForm.ServiceName, ips, -1)
 				}
@@ -121,13 +111,7 @@ func setupRouter() *gin.Engine {
 
 			if err == nil {
 				//Update local cache
-				ips := make([]models.IpList, 0, 10)
-
-				err := orm.Where("region = ? AND service_name = ?", QueryObject.Region, QueryObject.ServiceName).
-					Limit(10).
-					OrderBy("updated_at DESC").
-					Select("ip, ttl").
-					Find(&ips)
+				ips, err := services.IpService.GetList(QueryObject.Region, QueryObject.ServiceName, orm)
 				if err == nil {
 					localCache.Set("ip:"+QueryObject.Region+":"+QueryObject.ServiceName, ips, -1)
 				}
