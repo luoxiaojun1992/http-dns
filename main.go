@@ -58,8 +58,11 @@ func setupRouter() *gin.Engine {
 		}
 	})
 
+	// Basic auth
+	authGroup := r.Group("/", gin.BasicAuth(gin.Accounts{os.Getenv("BASIC_AUTH_USER"):os.Getenv("BASIC_AUTH_PWD")}))
+
 	// Ip register
-	r.POST("/ip", func(c *gin.Context) {
+	authGroup.POST("/ip", func(c *gin.Context) {
 		var PostForm struct {
 			Region      string `form:"region" binding:"required"`
 			ServiceName string `form:"service-name" binding:"required"`
@@ -89,7 +92,7 @@ func setupRouter() *gin.Engine {
 	})
 
 	// Ip delete
-	r.DELETE("/ip", func(c *gin.Context) {
+	authGroup.DELETE("/ip", func(c *gin.Context) {
 		var QueryObject struct {
 			Region      string `form:"region" binding:"required"`
 			ServiceName string `form:"service-name" binding:"required"`
