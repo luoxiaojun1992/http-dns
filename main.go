@@ -159,10 +159,8 @@ func run(r *gin.Engine) {
 }
 
 func init() {
-	var err error
-
 	//Init env
-	err = godotenv.Load()
+	err := godotenv.Load()
 	if err != nil {
 		log.Fatal(err)
 	}
