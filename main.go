@@ -12,6 +12,8 @@ import (
 	"github.com/luoxiaojun1992/http-dns/models"
 	"github.com/patrickmn/go-cache"
 	"time"
+	"github.com/joho/godotenv"
+	"os"
 )
 
 var orm *xorm.Engine
@@ -41,13 +43,14 @@ func setupRouter() *gin.Engine {
 		if err == nil {
 			ips := make([]models.IpList, 0, 10)
 
-			if ipListCache, result := localCache.Get("ip:"+QueryObj.Region+":"+QueryObj.ServiceName); result {
+			if ipListCache, result := localCache.Get("ip:" + QueryObj.Region + ":" + QueryObj.ServiceName); result {
 				c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "ok", "data": gin.H{"ips": ipListCache}})
 				return
 			}
 
 			err := orm.Where("region = ? AND service_name = ?", QueryObj.Region, QueryObj.ServiceName).
 				Limit(10).
+				OrderBy("updated_at DESC").
 				Select("ip, ttl").
 				Find(&ips)
 			if err == nil {
@@ -86,6 +89,7 @@ func setupRouter() *gin.Engine {
 
 				err := orm.Where("region = ? AND service_name = ?", PostForm.Region, PostForm.ServiceName).
 					Limit(10).
+					OrderBy("updated_at DESC").
 					Select("ip, ttl").
 					Find(&ips)
 				if err == nil {
@@ -101,7 +105,42 @@ func setupRouter() *gin.Engine {
 		}
 	})
 
-	//todo delete
+	// Ip delete
+	r.DELETE("/ip", func(c *gin.Context) {
+		var QueryObject struct {
+			Region      string `form:"region" binding:"required"`
+			ServiceName string `form:"service-name" binding:"required"`
+		}
+
+		err := c.Bind(&QueryObject)
+
+		if err == nil {
+			_, err := orm.OrderBy("updated_at DESC").Limit(10).Delete(models.IpList{
+				Region:      QueryObject.Region,
+				ServiceName: QueryObject.ServiceName,
+			})
+
+			if err == nil {
+				//Update local cache
+				ips := make([]models.IpList, 0, 10)
+
+				err := orm.Where("region = ? AND service_name = ?", QueryObject.Region, QueryObject.ServiceName).
+					Limit(10).
+					OrderBy("updated_at DESC").
+					Select("ip, ttl").
+					Find(&ips)
+				if err == nil {
+					localCache.Set("ip:"+QueryObject.Region+":"+QueryObject.ServiceName, ips, -1)
+				}
+
+				c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "ok"})
+			} else {
+				c.JSON(http.StatusInternalServerError, gin.H{"code": 1, "msg": err.Error()})
+			}
+		} else {
+			c.JSON(http.StatusBadRequest, gin.H{"code": 1, "msg": err.Error()})
+		}
+	})
 
 	return r
 }
@@ -125,10 +164,16 @@ func run(r *gin.Engine) {
 }
 
 func init() {
-	//Init ORM
 	var err error
-	//todo env or config
-	orm, err = xorm.NewEngine("mysql", "root:0600120597$Abc@/http_dns?charset=utf8mb4")
+
+	//Init env
+	err = godotenv.Load()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	//Init ORM
+	orm, err = xorm.NewEngine("mysql", os.Getenv("DB_USER") + ":" + os.Getenv("DB_PWD") + "@/" + os.Getenv("DB_NAME") + "?charset=utf8mb4")
 	if err != nil {
 		log.Fatal(err)
 	}
