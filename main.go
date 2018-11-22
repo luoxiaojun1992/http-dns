@@ -3,9 +3,7 @@ package main
 import (
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/go-xorm/xorm"
 	"github.com/joho/godotenv"
-	"github.com/luoxiaojun1992/http-dns/models"
 	"github.com/patrickmn/go-cache"
 	"log"
 	"net"
@@ -16,9 +14,9 @@ import (
 	"syscall"
 	"time"
 	"github.com/luoxiaojun1992/http-dns/services"
+	"github.com/luoxiaojun1992/http-dns/utils"
 )
 
-var orm *xorm.Engine
 var localCache *cache.Cache
 
 func setupRouter() *gin.Engine {
@@ -46,7 +44,7 @@ func setupRouter() *gin.Engine {
 				return
 			}
 
-			ips, err := services.IpService.GetList(QueryObj.Region, QueryObj.ServiceName, orm)
+			ips, err := services.IpService.GetList(QueryObj.Region, QueryObj.ServiceName)
 
 			if err == nil {
 				localCache.Set("ip:"+QueryObj.Region+":"+QueryObj.ServiceName, ips, -1)
@@ -71,16 +69,10 @@ func setupRouter() *gin.Engine {
 		err := c.Bind(&PostForm)
 
 		if err == nil {
-			_, err := orm.Insert(models.IpList{
-				Region:      PostForm.Region,
-				ServiceName: PostForm.ServiceName,
-				Ip:          PostForm.Ip,
-				Ttl:         PostForm.Ttl,
-			})
-
+			_, err := services.IpService.Add(PostForm.Region, PostForm.ServiceName, PostForm.Ip, PostForm.Ttl)
 			if err == nil {
 				//Update local cache
-				ips, err := services.IpService.GetList(PostForm.Region, PostForm.ServiceName, orm)
+				ips, err := services.IpService.GetList(PostForm.Region, PostForm.ServiceName)
 				if err == nil {
 					localCache.Set("ip:"+PostForm.Region+":"+PostForm.ServiceName, ips, -1)
 				}
@@ -104,14 +96,10 @@ func setupRouter() *gin.Engine {
 		err := c.Bind(&QueryObject)
 
 		if err == nil {
-			_, err := orm.OrderBy("updated_at DESC").Limit(10).Delete(models.IpList{
-				Region:      QueryObject.Region,
-				ServiceName: QueryObject.ServiceName,
-			})
-
+			_, err := services.IpService.Delete(QueryObject.Region, QueryObject.ServiceName)
 			if err == nil {
 				//Update local cache
-				ips, err := services.IpService.GetList(QueryObject.Region, QueryObject.ServiceName, orm)
+				ips, err := services.IpService.GetList(QueryObject.Region, QueryObject.ServiceName)
 				if err == nil {
 					localCache.Set("ip:"+QueryObject.Region+":"+QueryObject.ServiceName, ips, -1)
 				}
@@ -176,17 +164,8 @@ func init() {
 		log.Fatal(err)
 	}
 
-	//Init ORM
-	orm, err = xorm.NewEngine("mysql", os.Getenv("DB_USER")+":"+os.Getenv("DB_PWD")+"@/"+os.Getenv("DB_NAME")+"?charset=utf8mb4")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	//Sync Tables
-	err = orm.Sync2(new(models.IpList))
-	if err != nil {
-		log.Fatal(err)
-	}
+	//Init orm
+	utils.InitOrm()
 
 	//Init Local Cache
 	localCache = cache.New(1*time.Second, 10*time.Minute)
