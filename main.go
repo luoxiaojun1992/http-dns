@@ -14,6 +14,9 @@ import (
 	"time"
 	"github.com/joho/godotenv"
 	"os"
+	"sync"
+	"os/signal"
+	"syscall"
 )
 
 var orm *xorm.Engine
@@ -158,9 +161,30 @@ func run(r *gin.Engine) {
 
 	log.Println("Listening:" + port)
 
-	http.Serve(ln, r)
+	var wg sync.WaitGroup
 
-	//todo glance shutdown
+	s := &http.Server{
+		Handler:        r,
+		ReadTimeout:    10 * time.Second,
+		WriteTimeout:   10 * time.Second,
+		MaxHeaderBytes: 1 << 20,
+	}
+
+	wg.Add(1)
+	go func() {
+		log.Println(s.Serve(ln))
+		wg.Done()
+	}()
+
+	//Handle SIGINT and SIGTERM.
+	ch := make(chan os.Signal)
+	signal.Notify(ch, syscall.SIGINT, syscall.SIGTERM)
+	<-ch
+
+	//Graceful Shutdown
+	s.Shutdown(nil)
+
+	wg.Wait()
 }
 
 func init() {
