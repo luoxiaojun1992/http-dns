@@ -20,8 +20,6 @@ import (
 var orm *xorm.Engine
 var localCache *cache.Cache
 
-var ipLists map[string][]map[string]string
-
 func setupRouter() *gin.Engine {
 	// Disable Console Color
 	// gin.DisableConsoleColor()
@@ -211,9 +209,6 @@ func init() {
 }
 
 func main() {
-	ipLists = make(map[string][]map[string]string)
-	ipLists["sh:user-service"] = []map[string]string{{"ip": "192.168.0.1", "ttl": "600"}, {"ip": "192.168.0.2", "ttl": "600"}}
-
 	r := setupRouter()
 
 	// Listen and Server in 0.0.0.0:8080
