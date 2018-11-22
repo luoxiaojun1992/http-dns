@@ -6,18 +6,17 @@ import (
 )
 
 type ipService struct {
-
 }
 
 var IpService ipService
 
-func init()  {
+func init() {
 	//todo DI
 
 	IpService = ipService{}
 }
 
-func (s ipService) GetList (region, serviceName string) ([]models.IpList, error) {
+func (s ipService) GetList(region, serviceName string) ([]models.IpList, error) {
 	ips := make([]models.IpList, 0, 10)
 
 	err := utils.Orm.Where("region = ? AND service_name = ?", region, serviceName).
