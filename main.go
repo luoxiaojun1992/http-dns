@@ -16,6 +16,8 @@ import (
 	"github.com/luoxiaojun1992/http-dns/services"
 	"github.com/luoxiaojun1992/http-dns/utils"
 	"github.com/luoxiaojun1992/DI"
+	"github.com/gin-contrib/cors"
+	"strings"
 )
 
 var localCache *cache.Cache
@@ -24,6 +26,12 @@ func setupRouter() *gin.Engine {
 	// Disable Console Color
 	// gin.DisableConsoleColor()
 	r := gin.Default()
+
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:     strings.Split(os.Getenv("ALLOW_ORIGINS"), ","),
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTION"},
+		AllowCredentials: true,
+	}))
 
 	// Ping test
 	r.GET("/ping", func(c *gin.Context) {

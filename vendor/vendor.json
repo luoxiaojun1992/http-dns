@@ -3,6 +3,12 @@
 	"ignore": "test",
 	"package": [
 		{
+			"checksumSHA1": "yNw7LsCcmU4KA4lRdEWEfxnP9pM=",
+			"path": "github.com/gin-contrib/cors",
+			"revision": "488de3ec974f4e37bb0eb426cdee1aa897726300",
+			"revisionTime": "2018-10-08T11:31:11Z"
+		},
+		{
 			"checksumSHA1": "QeKwBtN2df+j+4stw3bQJ6yO4EY=",
 			"path": "github.com/gin-contrib/sse",
 			"revision": "22d885f9ecc78bf4ee5d72b937e4bbcdc58e8cae",
