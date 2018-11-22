@@ -16,7 +16,7 @@ func init() {
 	DI.C.Singleton("ip-service", IpService)
 }
 
-func (s IpServiceProto) GetList(region, serviceName string) ([]models.IpList, error) {
+func (s *IpServiceProto) GetList(region, serviceName string) ([]models.IpList, error) {
 	ips := make([]models.IpList, 0, 10)
 
 	err := utils.Orm.Where("region = ? AND service_name = ?", region, serviceName).
@@ -31,7 +31,7 @@ func (s IpServiceProto) GetList(region, serviceName string) ([]models.IpList, er
 	}
 }
 
-func (s IpServiceProto) Add(region, serviceName, ip, ttl string) (int64, error) {
+func (s *IpServiceProto) Add(region, serviceName, ip, ttl string) (int64, error) {
 	return utils.Orm.Insert(models.IpList{
 		Region:      region,
 		ServiceName: serviceName,
@@ -40,7 +40,7 @@ func (s IpServiceProto) Add(region, serviceName, ip, ttl string) (int64, error) 
 	})
 }
 
-func (s IpServiceProto) Delete(region, serviceName string) (int64, error) {
+func (s *IpServiceProto) Delete(region, serviceName string) (int64, error) {
 	return utils.Orm.OrderBy("updated_at DESC").Limit(10).Delete(models.IpList{
 		Region:      region,
 		ServiceName: serviceName,
