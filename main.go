@@ -18,7 +18,6 @@ import (
 	"github.com/luoxiaojun1992/DI"
 	"github.com/gin-contrib/cors"
 	"strings"
-	"fmt"
 	"github.com/luoxiaojun1992/http-dns/models"
 )
 
@@ -199,8 +198,6 @@ func init() {
 }
 
 func main() {
-	fmt.Println(net.LookupIP("www.baidu.com"))
-
 	r := setupRouter()
 
 	// Listen and Server in 0.0.0.0:8080
