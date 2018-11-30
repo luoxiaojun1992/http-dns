@@ -6,6 +6,10 @@ HttpDns.prototype.now = function() {
     return parseInt(Date.parse(new Date()) / 1000);
 };
 
+HttpDns.prototype.storageKey = function(region, serviceName) {
+    return 'http-dns:' + region + ':' + serviceName;
+};
+
 HttpDns.prototype.updateDnsCache = function(region, serviceName) {
     let httpDns = this;
     fetch(httpDns.gateway + '/ips?region=' + region + '&service-name=' + serviceName, {"METHOD": "GET"}).then(function (response) {
@@ -18,14 +22,14 @@ HttpDns.prototype.updateDnsCache = function(region, serviceName) {
                     ips[i].ttl = nowSecond + parseInt(ip.ttl)
                 });
 
-                localStorage.setItem('dns:' + region + ':' + serviceName, JSON.stringify(ips));
+                localStorage.setItem(httpDns.storageKey(region, serviceName), JSON.stringify(ips));
             }
         });
     });
 };
 
 HttpDns.prototype.resolveName = function(region, serviceName, once = false) {
-    const ipsStr = localStorage.getItem('dns:' + region + ':' + serviceName);
+    const ipsStr = localStorage.getItem(this.storageKey(region, serviceName));
     if (ipsStr) {
         let ips = JSON.parse(ipsStr);
         const nowSecond = this.now();
@@ -38,7 +42,7 @@ HttpDns.prototype.resolveName = function(region, serviceName, once = false) {
     }
 
     if (!once) {
-        self.updateDnsCache(region, serviceName);
+        this.updateDnsCache(region, serviceName);
         return this.resolveName(region, serviceName, true)
     }
 
@@ -46,4 +50,4 @@ HttpDns.prototype.resolveName = function(region, serviceName, once = false) {
 };
 
 // Demo
-// let httpDnsIns = new HttpDns('http://localhost:53103');
+// let httpDnsIns = new HttpDns('http://localhost:53372');
