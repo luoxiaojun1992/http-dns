@@ -18,6 +18,8 @@ import (
 	"github.com/luoxiaojun1992/DI"
 	"github.com/gin-contrib/cors"
 	"strings"
+	"fmt"
+	"github.com/luoxiaojun1992/http-dns/models"
 )
 
 var localCache *cache.Cache
@@ -56,8 +58,21 @@ func setupRouter() *gin.Engine {
 			ips, err := DI.C.Resolve("ip-service").(*services.IpServiceProto).GetList(QueryObj.Region, QueryObj.ServiceName)
 
 			if err == nil {
-				localCache.Set("ip:"+QueryObj.Region+":"+QueryObj.ServiceName, ips, -1)
-				c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "ok", "data": gin.H{"ips": ips}})
+				if len(ips) > 0 {
+					localCache.Set("ip:"+QueryObj.Region+":"+QueryObj.ServiceName, ips, -1)
+					c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "ok", "data": gin.H{"ips": ips}})
+				} else {
+					addrs, err := net.LookupHost(QueryObj.ServiceName)
+					if err == nil {
+						ips := make([]models.IpList, 0, len(addrs))
+						for _, addr := range addrs {
+							ips = append(ips, models.IpList{Ip: addr, Ttl: "600"})
+						}
+						c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "ok", "data": gin.H{"ips": ips}})
+					} else {
+						c.JSON(http.StatusInternalServerError, gin.H{"code": 1, "msg": err.Error()})
+					}
+				}
 			} else {
 				c.JSON(http.StatusInternalServerError, gin.H{"code": 1, "msg": err.Error()})
 			}
@@ -184,6 +199,8 @@ func init() {
 }
 
 func main() {
+	fmt.Println(net.LookupIP("www.baidu.com"))
+
 	r := setupRouter()
 
 	// Listen and Server in 0.0.0.0:8080

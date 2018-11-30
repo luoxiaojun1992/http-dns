@@ -50,4 +50,4 @@ HttpDns.prototype.resolveName = function(region, serviceName, once = false) {
 };
 
 // Demo
-// let httpDnsIns = new HttpDns('http://localhost:53372');
+// let httpDnsIns = new HttpDns('http://localhost:63186');
